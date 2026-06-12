@@ -27,29 +27,24 @@
     
     <div class="notice">※このサイトは10秒ごとに自動更新します</div>
 
-    <script>
-        // あなたのGASデプロイURLをここに貼り付けてください
-        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzT3ghoyUyfSutNBu-sx0PFdgDQxQiT0tsBH_rXVEPNJkSmhC0_lky60RR6-53b1Uyd/exec';
+async function updateStatus(myNumber) {
+    const res = await fetch('あなたのGASデプロイURL');
+    const data = await res.json();
+    
+    // 待機組数を表示
+    document.getElementById('total').innerText = data.totalWaiting;
 
-        async function updateStatus() {
-            try {
-                const res = await fetch(SCRIPT_URL);
-                const data = await res.json();
-                
-                // 待機人数をセット
-                document.getElementById('total').innerText = data.totalWaiting;
-                
-                // 呼び出し中の番号をセット
-                document.getElementById('calling').innerText = 
-                    data.callingNumbers.length > 0 ? data.callingNumbers.join(', ') : 'なし';
-            } catch (e) {
-                console.error('データ取得エラー:', e);
-            }
-        }
+    // 呼び出し中の番号を判定
+    const isMyTurn = data.callingNumbers.includes(parseInt(myNumber));
+    const statusDiv = document.getElementById('calling');
 
-        // 10秒ごとに自動更新
-        setInterval(updateStatus, 10000);
-        updateStatus();
-    </script>
+    if (isMyTurn) {
+        // 呼び出された時の表示
+        statusDiv.innerHTML = `<h2 style="color: red;">${myNumber}番様、お呼び出し中です！すぐにお越しください。</h2>`;
+    } else {
+        // 待機中の表示
+        statusDiv.innerHTML = `<h3>${myNumber}番様は待機中です。あと${data.totalWaiting}組お待ちです。</h3>`;
+    }
+}
 </body>
 </html>
