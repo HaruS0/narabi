@@ -2,15 +2,17 @@
 <html>
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>順番待ち状況</title>
     <style>
-        body { font-family: sans-serif; text-align: center; padding: 20px; background-color: #f4f4f9; }
-        .card { border: 1px solid #ddd; padding: 25px; max-width: 400px; margin: 0 auto; border-radius: 15px; background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
-        input { padding: 12px; width: 80px; font-size: 1.2rem; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px; }
-        button { padding: 12px 20px; font-size: 1rem; cursor: pointer; background: #28a745; color: white; border: none; border-radius: 5px; }
-        #status { margin-top: 20px; font-size: 1.1rem; }
-        .info-box { margin-top: 20px; text-align: left; border-top: 1px solid #eee; pt: 10px; }
-        .calling-list { color: #d9534f; font-weight: bold; }
+        body { font-family: sans-serif; text-align: center; padding: 20px; background-color: #f4f4f9; font-size: 1.2rem; }
+        .card { border: 1px solid #ddd; padding: 30px; max-width: 500px; margin: 0 auto; border-radius: 20px; background: white; box-shadow: 0 6px 10px rgba(0,0,0,0.1); }
+        h1 { font-size: 2rem; }
+        input { padding: 20px; width: 120px; font-size: 1.5rem; margin-bottom: 20px; border: 2px solid #ccc; border-radius: 10px; }
+        button { padding: 20px 40px; font-size: 1.5rem; cursor: pointer; background: #28a745; color: white; border: none; border-radius: 10px; width: 100%; }
+        #status { margin-top: 30px; font-size: 1.3rem; }
+        .info-box { margin-top: 30px; text-align: left; border-top: 2px solid #eee; padding-top: 20px; }
+        .calling-list { color: #d9534f; font-weight: bold; font-size: 1.5rem; }
     </style>
 </head>
 <body>
@@ -28,7 +30,7 @@
     </div>
 
     <script>
-        // 【重要】ここにGASの新しいデプロイURLを貼り付けてください
+        // デプロイURLを埋め込み済みです
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzT3ghoyUyfSutNBu-sx0PFdgDQxQiT0tsBH_rXVEPNJkSmhC0_lky60RR6-53b1Uyd/exec';
 
         function saveAndCheck() {
@@ -47,18 +49,15 @@
                 
                 const myNumInt = parseInt(myNumber);
                 
-                // 待機人数とリストの更新
                 document.getElementById('total').innerText = data.totalWaiting;
                 document.getElementById('callingList').innerText = 
                     data.callingNumbers.length > 0 ? data.callingNumbers.join(', ') : "なし";
 
-                // 自分より前の待機組数を計算
                 const peopleBeforeMe = data.waitingNumbers.filter(n => n < myNumInt).length;
-                
                 const statusDiv = document.getElementById('status');
                 
                 if (data.callingNumbers.includes(myNumInt)) {
-                    statusDiv.innerHTML = `<h2 style="color:red;">${myNumber}番様、お呼び出し中です！</h2>`;
+                    statusDiv.innerHTML = `<h2 style="color:red; font-size:2rem;">${myNumber}番様、お呼び出し中です！</h2>`;
                 } else if (data.waitingNumbers.includes(myNumInt)) {
                     statusDiv.innerHTML = `<h3>${myNumber}番様は待機中です。<br>あと <b>${peopleBeforeMe}組</b> で順番です。</h3>`;
                 } else {
