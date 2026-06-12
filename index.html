@@ -7,34 +7,47 @@
     <style>
         body { font-family: sans-serif; text-align: center; padding: 20px; background: #f4f7f6; }
         .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 400px; margin: 0 auto; }
-        .number { font-size: 4rem; color: #e74c3c; font-weight: bold; margin: 20px 0; }
-        .label { font-size: 1.2rem; color: #2c3e50; }
-        .notice { font-size: 0.8rem; color: #7f8c8d; margin-top: 15px; }
+        .big-number { font-size: 3rem; color: #2c3e50; font-weight: bold; margin: 10px 0; }
+        .calling-number { font-size: 2rem; color: #e74c3c; font-weight: bold; margin: 10px 0; }
+        .notice { font-size: 0.8rem; color: #7f8c8d; margin-top: 20px; }
     </style>
 </head>
 <body>
     <div class="card">
         <h1>現在の待ち状況</h1>
-        <div class="label">ただいまの待ち組数</div>
-        <div id="total" class="number">--</div>
-        <div class="label">組</div>
+        <div>ただいまの待機人数</div>
+        <div id="total" class="big-number">--</div>
+        <div>組</div>
+
+        <hr style="margin: 20px 0;">
+
+        <div>呼び出し中の番号</div>
+        <div id="calling" class="calling-number">-</div>
     </div>
     
     <div class="notice">※このサイトは10秒ごとに自動更新します</div>
 
     <script>
+        // あなたのGASデプロイURLをここに貼り付けてください
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzT3ghoyUyfSutNBu-sx0PFdgDQxQiT0tsBH_rXVEPNJkSmhC0_lky60RR6-53b1Uyd/exec';
 
         async function updateStatus() {
             try {
                 const res = await fetch(SCRIPT_URL);
                 const data = await res.json();
+                
+                // 待機人数をセット
                 document.getElementById('total').innerText = data.totalWaiting;
+                
+                // 呼び出し中の番号をセット
+                document.getElementById('calling').innerText = 
+                    data.callingNumbers.length > 0 ? data.callingNumbers.join(', ') : 'なし';
             } catch (e) {
                 console.error('データ取得エラー:', e);
             }
         }
 
+        // 10秒ごとに自動更新
         setInterval(updateStatus, 10000);
         updateStatus();
     </script>
