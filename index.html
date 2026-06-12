@@ -1,0 +1,42 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>順番待ち状況</title>
+    <style>
+        body { font-family: sans-serif; text-align: center; padding: 20px; background: #f4f7f6; }
+        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 400px; margin: 0 auto; }
+        .number { font-size: 4rem; color: #e74c3c; font-weight: bold; margin: 20px 0; }
+        .label { font-size: 1.2rem; color: #2c3e50; }
+        .notice { font-size: 0.8rem; color: #7f8c8d; margin-top: 15px; }
+    </style>
+</head>
+<body>
+    <div class="card">
+        <h1>現在の待ち状況</h1>
+        <div class="label">ただいまの待ち組数</div>
+        <div id="total" class="number">--</div>
+        <div class="label">組</div>
+    </div>
+    
+    <div class="notice">※このサイトは10秒ごとに自動更新します</div>
+
+    <script>
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzT3ghoyUyfSutNBu-sx0PFdgDQxQiT0tsBH_rXVEPNJkSmhC0_lky60RR6-53b1Uyd/exec';
+
+        async function updateStatus() {
+            try {
+                const res = await fetch(SCRIPT_URL);
+                const data = await res.json();
+                document.getElementById('total').innerText = data.totalWaiting;
+            } catch (e) {
+                console.error('データ取得エラー:', e);
+            }
+        }
+
+        setInterval(updateStatus, 10000);
+        updateStatus();
+    </script>
+</body>
+</html>
