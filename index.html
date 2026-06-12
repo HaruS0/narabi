@@ -2,49 +2,54 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>順番待ち状況</title>
+    <title>順番待ち確認</title>
     <style>
-        body { font-family: sans-serif; text-align: center; padding: 20px; background: #f4f7f6; }
-        .card { background: white; padding: 20px; border-radius: 15px; box-shadow: 0 4px 6px rgba(0,0,0,0.1); max-width: 400px; margin: 0 auto; }
-        .big-number { font-size: 3rem; color: #2c3e50; font-weight: bold; margin: 10px 0; }
-        .calling-number { font-size: 2rem; color: #e74c3c; font-weight: bold; margin: 10px 0; }
-        .notice { font-size: 0.8rem; color: #7f8c8d; margin-top: 20px; }
+        body { font-family: sans-serif; text-align: center; padding: 20px; }
+        .card { border: 1px solid #ccc; padding: 20px; max-width: 300px; margin: 0 auto; border-radius: 10px; }
+        input { padding: 10px; width: 60px; font-size: 1.2rem; }
+        button { padding: 10px 20px; font-size: 1rem; cursor: pointer; }
     </style>
 </head>
 <body>
     <div class="card">
-        <h1>現在の待ち状況</h1>
-        <div>ただいまの待機人数</div>
-        <div id="total" class="big-number">--</div>
-        <div>組</div>
-
-        <hr style="margin: 20px 0;">
-
-        <div>呼び出し中の番号</div>
-        <div id="calling" class="calling-number">-</div>
+        <h1>順番確認</h1>
+        <input type="number" id="myNumber" placeholder="番号">
+        <button onclick="saveAndCheck()">確認する</button>
+        <div id="status" style="margin-top:20px;"></div>
     </div>
-    
-    <div class="notice">※このサイトは10秒ごとに自動更新します</div>
 
-async function updateStatus(myNumber) {
-    const res = await fetch('あなたのGASデプロイURL');
-    const data = await res.json();
-    
-    // 待機組数を表示
-    document.getElementById('total').innerText = data.totalWaiting;
+    <script>
+        const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzT3ghoyUyfSutNBu-sx0PFdgDQxQiT0tsBH_rXVEPNJkSmhC0_lky60RR6-53b1Uyd/exec';
 
-    // 呼び出し中の番号を判定
-    const isMyTurn = data.callingNumbers.includes(parseInt(myNumber));
-    const statusDiv = document.getElementById('calling');
+        // 番号を保存してチェック開始
+        function saveAndCheck() {
+            const num = document.getElementById('myNumber').value;
+            localStorage.setItem('myNumber', num);
+            checkStatus();
+        }
 
-    if (isMyTurn) {
-        // 呼び出された時の表示
-        statusDiv.innerHTML = `<h2 style="color: red;">${myNumber}番様、お呼び出し中です！すぐにお越しください。</h2>`;
-    } else {
-        // 待機中の表示
-        statusDiv.innerHTML = `<h3>${myNumber}番様は待機中です。あと${data.totalWaiting}組お待ちです。</h3>`;
-    }
-}
+        async function checkStatus() {
+            const myNumber = localStorage.getItem('myNumber');
+            if (!myNumber) return;
+
+            const res = await fetch(SCRIPT_URL);
+            const data = await res.json();
+            
+            const isCalled = data.callingNumbers.includes(parseInt(myNumber));
+            const statusDiv = document.getElementById('status');
+            
+            if (isCalled) {
+                statusDiv.innerHTML = `<h2 style="color:red;">${myNumber}番様、お呼び出し中です！</h2>`;
+            } else {
+                statusDiv.innerHTML = `<h3>${myNumber}番様は現在待機中です。<br>（残り${data.totalWaiting}組）</h3>`;
+            }
+        }
+
+        // 5秒ごとに自動更新
+        setInterval(checkStatus, 5000);
+        
+        // ページ読み込み時に番号があれば自動チェック
+        if (localStorage.getItem('myNumber')) checkStatus();
+    </script>
 </body>
 </html>
