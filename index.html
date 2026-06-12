@@ -2,14 +2,15 @@
 <html>
 <head>
     <meta charset="UTF-8">
-    <title>順番待ち確認</title>
+    <title>順番待ち状況</title>
     <style>
-        body { font-family: sans-serif; text-align: center; padding: 20px; background-color: #f9f9f9; }
-        .card { border: 1px solid #ccc; padding: 20px; max-width: 400px; margin: 0 auto; border-radius: 10px; background: white; }
-        input { padding: 10px; width: 80px; font-size: 1.2rem; margin-bottom: 10px; }
-        button { padding: 10px 20px; font-size: 1rem; cursor: pointer; background: #007bff; color: white; border: none; border-radius: 5px; }
-        #status, #info { margin-top: 20px; }
-        .calling-list { font-weight: bold; color: #d9534f; font-size: 1.2rem; }
+        body { font-family: sans-serif; text-align: center; padding: 20px; background-color: #f4f4f9; }
+        .card { border: 1px solid #ddd; padding: 25px; max-width: 400px; margin: 0 auto; border-radius: 15px; background: white; box-shadow: 0 4px 6px rgba(0,0,0,0.1); }
+        input { padding: 12px; width: 80px; font-size: 1.2rem; margin-bottom: 10px; border: 1px solid #ccc; border-radius: 5px; }
+        button { padding: 12px 20px; font-size: 1rem; cursor: pointer; background: #28a745; color: white; border: none; border-radius: 5px; }
+        #status { margin-top: 20px; font-size: 1.1rem; }
+        .info-box { margin-top: 20px; text-align: left; border-top: 1px solid #eee; pt: 10px; }
+        .calling-list { color: #d9534f; font-weight: bold; }
     </style>
 </head>
 <body>
@@ -19,14 +20,15 @@
         <button onclick="saveAndCheck()">確認する</button>
 
         <div id="status"></div>
-        <hr>
-        <div id="info">
-            <p>ただいまの待機組数: <span id="total">--</span> 組</p>
-            <p>呼び出し中の番号: <span id="callingList" class="calling-list">--</span></p>
+        
+        <div class="info-box">
+            <p>現在の待機組数: <span id="total">--</span> 組</p>
+            <p>呼び出し中: <span id="callingList" class="calling-list">--</span></p>
         </div>
     </div>
 
     <script>
+        // 【重要】ここにGASの新しいデプロイURLを貼り付けてください
         const SCRIPT_URL = 'https://script.google.com/macros/s/AKfycbzT3ghoyUyfSutNBu-sx0PFdgDQxQiT0tsBH_rXVEPNJkSmhC0_lky60RR6-53b1Uyd/exec';
 
         function saveAndCheck() {
@@ -43,34 +45,31 @@
                 const res = await fetch(SCRIPT_URL);
                 const data = await res.json();
                 
-                // 0番を除外したリストを作成
-                const validCallingNumbers = data.callingNumbers.filter(n => n > 0);
+                const myNumInt = parseInt(myNumber);
                 
-                // 待機組数の表示
+                // 待機人数とリストの更新
                 document.getElementById('total').innerText = data.totalWaiting;
-                
-                // 呼び出し番号の表示（カンマ区切り、空なら「なし」）
                 document.getElementById('callingList').innerText = 
-                    validCallingNumbers.length > 0 ? validCallingNumbers.join(', ') : "なし";
+                    data.callingNumbers.length > 0 ? data.callingNumbers.join(', ') : "なし";
 
-                // 自分用ステータス
-                const isCalled = validCallingNumbers.includes(parseInt(myNumber));
+                // 自分より前の待機組数を計算
+                const peopleBeforeMe = data.waitingNumbers.filter(n => n < myNumInt).length;
+                
                 const statusDiv = document.getElementById('status');
                 
-                if (isCalled) {
+                if (data.callingNumbers.includes(myNumInt)) {
                     statusDiv.innerHTML = `<h2 style="color:red;">${myNumber}番様、お呼び出し中です！</h2>`;
-                } else if (parseInt(myNumber) > 0) {
-                    statusDiv.innerHTML = `<h3>${myNumber}番様は待機中です。</h3>`;
+                } else if (data.waitingNumbers.includes(myNumInt)) {
+                    statusDiv.innerHTML = `<h3>${myNumber}番様は待機中です。<br>あと <b>${peopleBeforeMe}組</b> で順番です。</h3>`;
+                } else {
+                    statusDiv.innerHTML = `<h3>${myNumber}番様は現在リストにありません。</h3>`;
                 }
             } catch (e) {
-                console.error("エラーが発生しました:", e);
+                console.error("更新エラー:", e);
             }
         }
 
-        // 10秒ごとに自動更新
         setInterval(checkStatus, 10000);
-        
-        // ページ読み込み時に保存された番号があれば自動チェック
         if (localStorage.getItem('myNumber')) {
             document.getElementById('myNumber').value = localStorage.getItem('myNumber');
             checkStatus();
