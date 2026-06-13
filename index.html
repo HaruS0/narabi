@@ -15,14 +15,23 @@
             margin: 0;
         }
         
-        /* タイトルを赤く大きく、かつ一つの塊として中央に配置 */
+        /* タイトル設定 */
         .title-container { margin-bottom: 25px; padding-top: 15px; }
+        
+        /* 上の段：3年2組（大きく） */
         .main-title { 
             color: #ff0000; 
-            font-size: 3.2rem; 
+            font-size: 3.5rem; 
             margin: 0; 
             text-shadow: 2px 2px 0px #fff; 
-            line-height: 1.2; 
+        }
+        
+        /* 下の段：ママにゲーム隠された！（少し小さく） */
+        .sub-title { 
+            color: #ff0000; 
+            font-size: 2.2rem; 
+            margin: 0; 
+            text-shadow: 2px 2px 0px #fff; 
         }
         
         .card { 
@@ -58,7 +67,8 @@
 <body>
 
     <div class="title-container">
-        <h1 class="main-title">3年2組 ママにゲーム隠された！</h1>
+        <h1 class="main-title">3年2組</h1>
+        <h2 class="sub-title">ママにゲーム隠された！</h2>
     </div>
 
     <div class="card">
@@ -121,15 +131,3 @@
                 document.getElementById('status').innerText = "接続エラー発生。再試行中...";
             } finally {
                 document.getElementById('loading').style.display = "none";
-            }
-        }
-
-        setInterval(checkStatus, 10000);
-        
-        if (localStorage.getItem('myNumber')) {
-            document.getElementById('myNumber').value = localStorage.getItem('myNumber');
-            checkStatus();
-        }
-    </script>
-</body>
-</html>
